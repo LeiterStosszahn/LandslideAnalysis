@@ -5,7 +5,6 @@ ImportLog
 Index
 *.gdb
 Raster
-result.csv
 *.code-workspace
 *.aprx
 *.atbx
