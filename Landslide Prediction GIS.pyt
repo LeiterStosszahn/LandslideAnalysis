@@ -195,13 +195,15 @@ class creatFishnet:
         # Raster Join
         self.existPoints = []
         def rasterJoin(mainLayer: str, rasterLayer: str, path: str, target: str, year: str) -> None:
-            arcpy.AddMessage("Using {}...".format(rasterLayer))
             ## Raster to points
             pathRaster = os.path.join("memory", target + year) # Save intermediate result in memory
             ### Check whether the raster points existing
             if pathRaster not in self.existPoints:
-                self.existPoints.append(self.existPoints) # Save the processed points to save calculation time
+                arcpy.AddMessage("Using {} to generate points, saved in {}.".format(rasterLayer, pathRaster))
+                self.existPoints.append(pathRaster) # Save the processed points to save calculation time
                 arcpy.conversion.RasterToPoint(rasterLayer, pathRaster, "VALUE")
+            else:
+                arcpy.AddMessage("Using exisisting {} points data.".format(pathRaster))
             ## Add data into fishnet
             spatialJoin("CONTAINS", mainLayer, pathRaster, "grid_code", path, target)
 
@@ -324,14 +326,14 @@ class creatFishnet:
         # Merge all layers
         arcpy.AddMessage("Saving Results...")
         arcpy.management.Merge(result, savePath)
+        # Test
+        arcpy.management.CopyFeatures(savePath, savePath+"_old")
 
         # Delete Null cell (edge or sea)
-        expression = (
-            arcpy.AddFieldDelimiters(savePath, "vegetation")+" IS NULL OR "+
+        expression = arcpy.AddFieldDelimiters(savePath, "vegetation")+" IS NULL OR "+ \
             arcpy.AddFieldDelimiters(savePath, "landUse")+" IS NULL"
-        )
         arcpy.management.SelectLayerByAttribute(savePath, "NEW_SELECTION", expression)
-        arcpy.management.DeleteRows(savePath)
+        arcpy.management.DeleteRows(savePath) #有问题！！！！！！！！！！！！！！！！！！！
         # Change Null in landslide into 0
         expression = arcpy.AddFieldDelimiters(savePath, "landslide")+" IS NULL"
         arcpy.management.SelectLayerByAttribute(savePath, "NEW_SELECTION", expression)
