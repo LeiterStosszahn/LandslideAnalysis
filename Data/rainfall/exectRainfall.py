@@ -40,6 +40,6 @@ class rainFall:
         return
 
 if __name__ == "__main__":
-    a = rainFall("Data\\rainfall", 2021)
+    a = rainFall("Data\\rainfall", 2018)
     a.addStationCord("Data\\rainfall\\rainfallStation.xlsx")
     a.toCSV("Data\\rainfall\\result.csv")
