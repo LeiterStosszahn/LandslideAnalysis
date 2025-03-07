@@ -125,7 +125,7 @@ class randomForest:
             output_classification_table=os.path.join(savePath, "classification"),
             output_validation_table=os.path.join(savePath, "validationTable"),
             compensate_sparse_categories=True,
-            number_validation_runs=2,
+            number_validation_runs=5,
             calculate_uncertainty=True,
             output_trained_model=os.path.join(savePath, "model")
         )
