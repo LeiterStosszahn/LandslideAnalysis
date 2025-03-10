@@ -19,6 +19,13 @@ class randomForest:
             parameterType="Required",
             direction="Input"
         )
+        builtUp = arcpy.Parameter(
+            displayName="Urban built-up area Layer",
+            name="builtUp",
+            datatype="GPFeatureLayer",
+            parameterType="Required",
+            direction="Input",
+        )
         predictNet = arcpy.Parameter(
             displayName="Prediction fishnet Layer",
             name="predictNet",
@@ -42,7 +49,7 @@ class randomForest:
             direction="Input"
         )
 
-        return [trainNet, predictNet, predictDate, savePath]
+        return [trainNet, builtUp, predictNet, predictDate, savePath]
 
     def isLicensed(self):
         """Set whether the tool is licensed to execute."""
@@ -62,9 +69,10 @@ class randomForest:
     def execute(self, parameters, messages):
         """The source code of the tool."""
         trainNet = parameters[0].valueAsText
-        predictNet = parameters[1].valueAsText
-        predictDate = parameters[2].valueAsText
-        savePath = parameters[3].valueAsText
+        bulitUp = parameters[1].valueAsText
+        predictNet = parameters[2].valueAsText
+        predictDate = parameters[3].valueAsText
+        savePath = parameters[4].valueAsText
 
         # Copy to memory
         ## Copy training data
@@ -132,12 +140,11 @@ class randomForest:
 
         arcpy.management.Delete([trainPath])
 
-        # # Change slope 0 into non-landslide
-        # arcpy.management.MakeFeatureLayer(predictedFeaturePath, "tempTableView")
-        # expression = arcpy.AddFieldDelimiters("tempTableView", "slope") + " = \'1\'"
-        # arcpy.management.SelectLayerByAttribute("tempTableView", "NEW_SELECTION", expression)
-        # arcpy.management.CalculateField("tempTableView", "PREDICTED", '0', "PYTHON3")
-        # arcpy.management.SelectLayerByAttribute("tempTableView", "CLEAR_SELECTION")
+        # Change built-up area into non-landslide
+        arcpy.management.MakeFeatureLayer(predictedFeaturePath, "tempTableView")
+        arcpy.management.SelectLayerByLocation("tempTableView", "INTERSECT", bulitUp)
+        arcpy.management.CalculateField("tempTableView", "PREDICTED", '0', "PYTHON3")
+        arcpy.management.SelectLayerByAttribute("tempTableView", "CLEAR_SELECTION")
         
         # Annotation in real prediction work
         self.valid(predictedFeaturePath, predictPath)
